@@ -1,0 +1,8 @@
+cd
+cd Desktop/shiny/sean
+sftp david@104.236.225.136
+precedex
+cd ../../srv/shiny-server/toyDM
+
+
+
