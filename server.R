@@ -2,10 +2,23 @@ library(ggvis)
 library(dplyr)
 if (FALSE) library(RSQLite)
 
-db <- src_sqlite("SHINY.db")
-GED_AB <- tbl(db, "GED_AB")
+# db <- src_sqlite("SHINY.db")
+# GED_AB <- tbl(db, "GED_AB")
 
 shinyServer(function(input, output, session) {
+  
+
+  # make the dataset its own reactive function to handle updates to the SQL table
+  # On every input$submit click, first update the SQL table, then query the table and return
+  
+  GED_AB <- eventReactive(input$submit,({
+    if(!is.null(input$datapath)) {
+      read.csv(inFile$datapath, header=input$header, sep=input$sep, 
+               quote=input$quote) %>% saveData()
+    }
+    output_db <- loadData() %>% as.tbl
+    return(output_db)
+  }),ignoreNULL = FALSE)
 
   genes <- reactive({
     	minavgALL <- input$avgALL[1]
@@ -19,10 +32,10 @@ shinyServer(function(input, output, session) {
  	    minLOG <- input$log[1]  
  	    maxLOG <- input$log[2]  
 
-    m <- GED_AB %>%
+    m <- GED_AB() %>%
       filter(
-        avgALL >= minavgALL,
-        avgALL <= maxavgALL,
+        avgAll >= minavgALL,
+        avgAll <= maxavgALL,
         avgCON >= minavgCON,
         avgAFF >= minavgAFF,
         CV >= minCV,

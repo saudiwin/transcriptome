@@ -38,6 +38,22 @@ shinyUI(fluidPage(
           " deposited at the Sequence Read Archive under Bioproject ",
           " Accession ID PRJNA293549."
         ))
+      ),
+      wellPanel(fileInput('file1', 'Choose CSV File',
+                          accept=c('text/csv', 
+                                   'text/comma-separated-values,text/plain', 
+                                   '.csv')),
+                checkboxInput('header', 'Header', TRUE),
+                radioButtons('sep', 'Separator',
+                             c(Comma=',',
+                               Semicolon=';',
+                               Tab='\t'),
+                             ','),
+                radioButtons('quote', 'Quote',
+                             c(None='',
+                               'Double Quote'='"',
+                               'Single Quote'="'"),
+                             '"')
       )
     ),
     mainPanel(
