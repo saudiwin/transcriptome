@@ -37,31 +37,39 @@ shinyUI(fluidPage(
           " TOPHAT and FPKM determined by CUFFLINKS. The raw sequence data has been ",
           " deposited at the Sequence Read Archive under Bioproject ",
           " Accession ID PRJNA293549."
-        ))
+        )))
       ),
-      wellPanel(fileInput('file1', 'Choose CSV File',
-                          accept=c('text/csv', 
-                                   'text/comma-separated-values,text/plain', 
-                                   '.csv')),
-                checkboxInput('header', 'Header', TRUE),
-                radioButtons('sep', 'Separator',
-                             c(Comma=',',
-                               Semicolon=';',
-                               Tab='\t'),
-                             ','),
-                radioButtons('quote', 'Quote',
-                             c(None='',
-                               'Double Quote'='"',
-                               'Single Quote'="'"),
-                             '"')
-      )
-    ),
     mainPanel(
-      ggvisOutput("plot1"),
-      wellPanel(
-        span("Number of genes selected:", textOutput("n_genes"))
-      ),
+      # Add a tabset Panel to Save space
+      tabsetPanel(
+        tabPanel("Plot",ggvisOutput("plot1")),
+                 tabPanel("Data Upload", 
+
+                          wellPanel(tags$p("To upload new data to the server for processing in CSV format, use the upload form below."),
+                                    fileInput('file1', 'Choose CSV File',
+                                              accept=c('text/csv', 
+                                                       'text/comma-separated-values,text/plain', 
+                                                       '.csv')),
+                                    checkboxInput('header', 'Header', TRUE),
+                                    radioButtons('sep', 'Separator',
+                                                 c(Comma=',',
+                                                   Semicolon=';',
+                                                   Tab='\t'),
+                                                 ','),
+                                    radioButtons('quote', 'Quote',
+                                                 c(None='',
+                                                   'Double Quote'='"',
+                                                   'Single Quote'="'"),
+                                                 '"'))),
+                 tabPanel("Data Download",
+                          wellPanel(
+                            tags$p("To download the current displayed data as a CSV file, press the download button below."),
+                          downloadButton('downloadData', 'Download'))
+                          )
+                 ),
+        wellPanel(
+          span("Number of genes selected:", textOutput("n_genes"))
+        ),
       dataTableOutput(outputId="dt")
-    )
-  )  
-))  
+      )
+)))  

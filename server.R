@@ -1,6 +1,6 @@
 library(ggvis)
 library(dplyr)
-if (FALSE) library(RSQLite)
+library(RSQLite)
 
 # db <- src_sqlite("SHINY.db")
 # GED_AB <- tbl(db, "GED_AB")
@@ -83,4 +83,24 @@ shinyServer(function(input, output, session) {
   output$n_genes <- renderText({ nrow(genes()) })
 
   output$dt <- renderDataTable(genes()[,1:5])
+  
+  
+  # add a server-side download handler
+  
+  output$downloadData <- downloadHandler(
+    
+    # This function returns a string which tells the client
+    # browser what name to use when saving the file.
+    filename = 'transcriptome_data.csv',
+    
+    # This function should write data to a file given to it by
+    # the argument 'file'.
+    content = function(file) {
+      # Write to a file specified by the 'file' argument
+      # Reactive dependency on the filtered data file via the genes function
+      # Note that downloadHandler only works in a real browser window
+      
+      write.csv(genes(), file,
+                  row.names = FALSE)
+    })
 })
