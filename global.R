@@ -33,8 +33,8 @@ axis_vars <- c(
 
 # Helper functions from Rstudio Shiny's ref files for RSQLite
 
-sqlitePath <- "/path/to/sqlite/database"
-table <- "responses"
+sqlitePath <- "SHINY.db"
+table <- "GED_AB"
 
 saveData <- function(data) {
   # Connect to the database
