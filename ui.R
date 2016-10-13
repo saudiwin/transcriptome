@@ -50,17 +50,15 @@ shinyUI(fluidPage(
                                               accept=c('text/csv', 
                                                        'text/comma-separated-values,text/plain', 
                                                        '.csv')),
+                                    textInput('tabnameinput',"Name of table:"),
                                     checkboxInput('header', 'Header', TRUE),
                                     radioButtons('sep', 'Separator',
                                                  c(Comma=',',
                                                    Semicolon=';',
                                                    Tab='\t'),
                                                  ','),
-                                    radioButtons('quote', 'Quote',
-                                                 c(None='',
-                                                   'Double Quote'='"',
-                                                   'Single Quote'="'"),
-                                                 '"'))),
+                                    actionButton("submit",tags$b("Load data for analysis"))
+                                    )),
                  tabPanel("Data Download",
                           wellPanel(
                             tags$p("To download the current displayed data as a CSV file, press the download button below."),
@@ -68,7 +66,8 @@ shinyUI(fluidPage(
                           )
                  ),
         wellPanel(
-          span("Number of genes selected:", textOutput("n_genes"))
+          span("Number of genes selected:", textOutput("n_genes")),
+          uiOutput("tabnames")
         ),
       dataTableOutput(outputId="dt")
       )

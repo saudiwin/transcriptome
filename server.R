@@ -2,6 +2,46 @@ library(ggvis)
 library(dplyr)
 library(RSQLite)
 
+# Helper functions from Rstudio Shiny's ref files for RSQLite
+
+sqlitePath <- "SHINY.db"
+table <- "GED_AB"
+
+saveData <- function(data,tablename) {
+  # Connect to the database
+  db <- dbConnect(SQLite(), sqlitePath)
+  
+  # Write a new table to analyze data
+  dbWriteTable(db,tablename,data)
+  
+  dbDisconnect(db)
+}
+
+loadData <- function(tablename) {
+  # Connect to the database
+  db <- dbConnect(SQLite(), sqlitePath)
+  if(tablename=="Original") {
+    tablename <- table
+  }
+  # Construct the fetching query
+  query <- sprintf("SELECT * FROM %s", tablename)
+  # Submit the fetch query and disconnect
+  data <- dbGetQuery(db, query)
+  dbDisconnect(db)
+  data
+}
+
+getTableNames <- function() {
+  # Connect to the database
+  db <- dbConnect(SQLite(), sqlitePath)
+  # Get list of current tables in SQLite database
+  data <- dbListTables(db)
+  data[data=='GED_AB'] <- 'Original'
+  dbDisconnect(db)
+  data
+  
+}
+
 # db <- src_sqlite("SHINY.db")
 # GED_AB <- tbl(db, "GED_AB")
 
@@ -11,14 +51,31 @@ shinyServer(function(input, output, session) {
   # make the dataset its own reactive function to handle updates to the SQL table
   # On every input$submit click, first update the SQL table, then query the table and return
   
-  GED_AB <- eventReactive(input$submit,({
-    if(!is.null(input$datapath)) {
-      read.csv(inFile$datapath, header=input$header, sep=input$sep, 
-               quote=input$quote) %>% saveData()
+  update_tables <- eventReactive(input$submit,{
+    if(!is.null(input$file1$datapath)) {
+      validate(
+        need(input$tabnameinput != "", "Please specify a table name"),
+        need(match(input$tabnameinput,getTableNames(),nomatch=-1)==-1,"Don't use an existing table name.")
+      )
+      data.table::fread(input$file1$datapath, header=input$header, sep=input$sep) %>% as.data.frame %>% 
+                saveData(tablename=input$tabnameinput)
     }
-    output_db <- loadData() %>% as.tbl
+  TRUE
+  },ignoreNULL = FALSE)
+  
+  table_names <- eventReactive(input$submit,{
+    getTableNames()
+  },ignoreNULL = FALSE)
+  
+  GED_AB <- reactive({
+    if(is.null(input$tableid)) {
+      table_ref <- 'Original'
+    } else {
+      table_ref <- input$tableid
+    }
+    output_db <- loadData(table_ref) %>% as.tbl
     return(output_db)
-  }),ignoreNULL = FALSE)
+  })
 
   genes <- reactive({
     	minavgALL <- input$avgALL[1]
@@ -103,4 +160,11 @@ shinyServer(function(input, output, session) {
       write.csv(genes(), file,
                   row.names = FALSE)
     })
+  
+  # Add a server function to handle dynamically creating a list of table names
+  
+  output$tabnames = renderUI({
+
+    selectInput('tableid', "Select table with data to use:",table_names() )
+  })
 })
