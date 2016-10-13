@@ -51,7 +51,7 @@ shinyServer(function(input, output, session) {
   # make the dataset its own reactive function to handle updates to the SQL table
   # On every input$submit click, first update the SQL table, then query the table and return
   
-  update_tables <- eventReactive(input$submit,{
+  update_tables <- observeEvent(input$submit,{
     if(!is.null(input$file1$datapath)) {
       validate(
         need(input$tabnameinput != "", "Please specify a table name"),
@@ -60,7 +60,7 @@ shinyServer(function(input, output, session) {
       data.table::fread(input$file1$datapath, header=input$header, sep=input$sep) %>% as.data.frame %>% 
                 saveData(tablename=input$tabnameinput)
     }
-  TRUE
+    
   },ignoreNULL = FALSE)
   
   table_names <- eventReactive(input$submit,{
